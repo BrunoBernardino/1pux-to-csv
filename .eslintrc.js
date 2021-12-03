@@ -1,0 +1,56 @@
+const eslint = {
+  parser: '@typescript-eslint/parser',
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+  ],
+  rules: {
+    semi: 2,
+    'max-len': 'off',
+    'no-console': 'off',
+    'no-param-reassign': 'off',
+    'import/prefer-default-export': 'off',
+    'import/no-extraneous-dependencies': 'off',
+    'implicit-arrow-linebreak': 'off',
+    'object-curly-newline': 'off',
+    'no-restricted-syntax': 'off',
+    'operator-linebreak': 'off',
+    'arrow-body-style': 'off',
+    'no-underscore-dangle': 'off',
+    '@typescript-eslint/no-empty-function': 'off',
+    '@typescript-eslint/no-var-requires': 'off',
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    'spaced-comment': 'off',
+    '@typescript-eslint/no-empty-interface': 'off',
+    '@typescript-eslint/no-explicit-any': 'off',
+    'import/first': 'off',
+    '@typescript-eslint/camelcase': 'off',
+    '@typescript-eslint/ban-ts-ignore': 'off',
+    'no-await-in-loop': 'off',
+    'no-continue': 'off',
+    'no-nested-ternary': 'off',
+    'import/extensions': 'off',
+    'newline-per-chained-call': 'off',
+    'no-use-before-define': 'off',
+    '@typescript-eslint/no-use-before-define': ['error'],
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/ban-ts-comment': 'off',
+    'prefer-destructuring': 'warn',
+  },
+  settings: {
+    'import/resolver': {
+      node: {
+        paths: ['./src'],
+        extensions: ['.js', '.ts'],
+      },
+    },
+  },
+  plugins: ['@typescript-eslint'],
+  env: {
+    node: true,
+    jest: true,
+  },
+};
+
+module.exports = eslint;

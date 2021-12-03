@@ -1,0 +1,61 @@
+{
+  "name": "1pux-to-csv",
+  "version": "1.0.0",
+  "description": "Convert 1Password .1pux files to .csv",
+  "main": "./parser.js",
+  "bin": "./index.js",
+  "engines": {
+    "node": "14.x",
+    "npm": "6.x"
+  },
+  "scripts": {
+    "start": "ts-node src/index.ts",
+    "build": "rm -fr ./dist && tsc && chmod +x ./dist/index.js && sed -i 's/ts-node/node/' ./dist/index.js && cp ./src/types.ts ./dist && rm -f ./dist/types.js",
+    "create-example-file": "rm -f ./src/__tests__/example.1pux && cd ./src/__tests__/example && zip -r ../example.1pux .",
+    "test": "npm run prettier/test && npm run lint && npm run create-example-file && jest",
+    "build/test": "npm run create-example-file && ./dist/index.js ./src/__tests__/example.1pux -o ./example.csv && cat ./example.csv",
+    "lint": "eslint --ext .js,.ts . && tsc --noEmit",
+    "prettier": "prettier --write '*.{js,ts,json}' '**/*.{js,ts,json}'",
+    "prettier/test": "prettier --check '*.{js,ts,json}' '**/*.{js,ts,json}'",
+    "deploy": "npm run build && npm run build/test && cp ./package.json ./README.md ./dist && cd ./dist && npm publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrunoBernardino/1pux-to-csv.git"
+  },
+  "keywords": [
+    "1password",
+    "1pux",
+    "csv",
+    "password",
+    "export",
+    "convert",
+    "import"
+  ],
+  "author": "Bruno Bernardino <me@brunobernardino.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BrunoBernardino/1pux-to-csv/issues"
+  },
+  "homepage": "https://github.com/BrunoBernardino/1pux-to-csv#readme",
+  "devDependencies": {
+    "@babel/core": "7.16.0",
+    "@babel/preset-env": "7.16.4",
+    "@babel/preset-typescript": "7.16.0",
+    "@types/jest": "27.0.3",
+    "@types/node": "16.11.11",
+    "@typescript-eslint/eslint-plugin": "5.5.0",
+    "@typescript-eslint/parser": "5.5.0",
+    "babel-jest": "27.4.2",
+    "eslint": "8.3.0",
+    "eslint-config-prettier": "8.3.0",
+    "jest": "27.4.3",
+    "prettier": "2.5.0",
+    "ts-node": "10.4.0",
+    "typescript": "4.5.2"
+  },
+  "dependencies": {
+    "commander": "8.3.0",
+    "jszip": "3.7.1"
+  }
+}
