@@ -1,6 +1,6 @@
 {
   "name": "1pux-to-csv",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Convert 1Password .1pux files to .csv",
   "main": "./parser.js",
   "bin": "./index.js",

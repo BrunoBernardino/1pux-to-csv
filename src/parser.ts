@@ -1,8 +1,15 @@
 import { loadAsync } from 'jszip';
 
-import { OnePuxData, OnePuxItem, OnePuxExport } from './types';
+import {
+  OnePuxData,
+  OnePuxItem,
+  OnePuxExport,
+  OnePuxItemDetailsLoginField,
+} from './types';
 
-export const parse1PuxFile = async (fileContents: string | Buffer) => {
+export const parse1PuxFile = async (
+  fileContents: string | Buffer | Uint8Array,
+) => {
   try {
     const zip = await loadAsync(fileContents);
 
@@ -52,10 +59,41 @@ type RowData = {
   username: string;
   password: string;
   notes: string;
-  extraFields: string;
+  extraFields: ExtraField[];
 };
 
-type ExtraField = { name: string; value: string };
+type ExtraFieldType =
+  | 'username'
+  | 'password'
+  | 'url'
+  | 'email'
+  | 'date'
+  | 'month'
+  | 'credit'
+  | 'phone'
+  | 'totp'
+  | 'text';
+
+type ExtraField = { name: string; value: string; type: ExtraFieldType };
+
+type ParseFieldTypeToExtraFieldType = (
+  field: OnePuxItemDetailsLoginField,
+) => ExtraFieldType;
+
+const parseFieldTypeToExtraFieldType: ParseFieldTypeToExtraFieldType = (
+  field,
+) => {
+  if (field.designation === 'username') {
+    return 'username';
+  } else if (field.designation === 'password') {
+    return 'password';
+  } else if (field.fieldType === 'E') {
+    return 'email';
+  } else if (field.fieldType === 'U') {
+    return 'url';
+  }
+  return 'text';
+};
 
 export const parseToRowData = (
   item: OnePuxItem['item'],
@@ -68,7 +106,7 @@ export const parseToRowData = (
     username: '',
     password: '',
     notes: item.details.notesPlain || '',
-    extraFields: '',
+    extraFields: [],
   };
 
   // Skip documents
@@ -78,8 +116,6 @@ export const parseToRowData = (
   ) {
     return;
   }
-
-  const extraFields: ExtraField[] = [];
 
   // Extract username, password, and some extraFields
   item.details.loginFields.forEach((field) => {
@@ -96,9 +132,10 @@ export const parseToRowData = (
       // Skip these noisy form-fields
       return;
     } else {
-      extraFields.push({
+      rowData.extraFields.push({
         name: field.name || field.id,
         value: field.value,
+        type: parseFieldTypeToExtraFieldType(field),
       });
     }
   });
@@ -107,6 +144,7 @@ export const parseToRowData = (
   item.details.sections.forEach((section) => {
     section.fields.forEach((field) => {
       let value = '';
+      let type: ExtraFieldType = 'text';
 
       if (Object.prototype.hasOwnProperty.call(field.value, 'concealed')) {
         value = field.value.concealed || '';
@@ -118,12 +156,16 @@ export const parseToRowData = (
         value = field.value.string || '';
       } else if (Object.prototype.hasOwnProperty.call(field.value, 'email')) {
         value = field.value.email || '';
+        type = 'email';
       } else if (Object.prototype.hasOwnProperty.call(field.value, 'phone')) {
         value = field.value.phone || '';
+        type = 'phone';
       } else if (Object.prototype.hasOwnProperty.call(field.value, 'url')) {
         value = field.value.url || '';
+        type = 'url';
       } else if (Object.prototype.hasOwnProperty.call(field.value, 'totp')) {
         value = field.value.totp || '';
+        type = 'totp';
       } else if (Object.prototype.hasOwnProperty.call(field.value, 'gender')) {
         value = field.value.gender || '';
       } else if (
@@ -134,26 +176,28 @@ export const parseToRowData = (
         Object.prototype.hasOwnProperty.call(field.value, 'creditCardNumber')
       ) {
         value = field.value.creditCardNumber || '';
+        type = 'credit';
       } else if (
         Object.prototype.hasOwnProperty.call(field.value, 'monthYear')
       ) {
         value =
           (field.value.monthYear && field.value.monthYear.toString()) || '';
+        type = 'month';
       } else if (Object.prototype.hasOwnProperty.call(field.value, 'date')) {
         value = (field.value.date && field.value.date.toString()) || '';
+        type = 'date';
       } else {
         // Default, so no data is lost when something new comes up
         value = JSON.stringify(field.value);
       }
 
-      extraFields.push({
+      rowData.extraFields.push({
         name: field.title || field.id,
         value,
+        type,
       });
     });
   });
-
-  rowData.extraFields = JSON.stringify(extraFields);
 
   return rowData;
 };
@@ -166,7 +210,7 @@ const convertDataToRow = (rowData: RowData) => {
     rowData.username,
     rowData.password,
     rowData.notes,
-    rowData.extraFields,
+    JSON.stringify(rowData.extraFields),
   ]
     .map(escapeCSVValue)
     .join(',');

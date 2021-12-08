@@ -32,11 +32,12 @@ test('Converting of parsed example.1pux file', async () => {
     `name,tags,url,username,password,notes,extraFields
 Dropbox,"Personal,one-tag,another tag",https://www.dropbox.com/,user@example.com,most-secure-password-ever!,"This is a note. *bold*! _italic_!","${JSON.stringify(
       [
-        { name: 'PIN', value: '12345' },
+        { name: 'PIN', value: '12345', type: 'text' },
         {
           name: 'one-time password',
           value:
             'otpauth://totp/Dropbox:user@example.com?secret=FAKEONE&issuer=Dropbox',
+          type: 'totp',
         },
       ],
     ).replace(/"/g, '""')}"`,
